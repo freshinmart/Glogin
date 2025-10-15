@@ -1,4 +1,4 @@
-<html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -411,6 +411,13 @@
             box-shadow: 0 8px 20px rgba(76, 201, 240, 0.4);
         }
 
+        .confirm-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         /* Success Page */
         .success-message {
             text-align: center;
@@ -505,6 +512,10 @@
 
         .cart-badge.hidden {
             display: none;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         /* Modal Styles */
@@ -1281,7 +1292,7 @@
                 <div class="qris-instruction">
                     Scan QR code di atas untuk melakukan pembayaran
                 </div>
-                <button class="confirm-btn" onclick="saveQRISProgress()">Simpan & Lanjutkan</button>
+                <button class="confirm-btn" id="save-qris-btn" onclick="saveQRISProgress()">Simpan & Lanjutkan</button>
             </div>
         </div>
 
@@ -1406,7 +1417,7 @@
                         </select>
                     </div>
                     
-                    <button class="confirm-btn" onclick="addManualProduct()">Tambah Produk</button>
+                    <button class="confirm-btn" id="add-manual-product-btn" onclick="addManualProduct()">Tambah Produk</button>
                     
                     <div class="section-title" style="margin-top: 30px;">
                         <i class="fas fa-receipt"></i>
@@ -1505,7 +1516,7 @@
             });
             document.getElementById(pageId).classList.add('active');
             
-            // Tampilkan/sembunyikan floating cart
+            // Tampilkan/sembunyikan floating cart HANYA di halaman products-page
             const floatingCart = document.getElementById('floating-cart');
             if (pageId === 'products-page') {
                 floatingCart.classList.remove('hidden');
@@ -1698,9 +1709,11 @@
             const qrisLoading = document.getElementById('qris-loading');
             const qrisImage = document.getElementById('qris-image');
             const qrisAmount = document.getElementById('qris-amount');
+            const saveQRISBtn = document.getElementById('save-qris-btn');
             
             qrisLoading.style.display = 'block';
             qrisImage.style.display = 'none';
+            saveQRISBtn.disabled = true;
             qrisAmount.textContent = `Rp ${amount.toLocaleString('id-ID')}`;
             
             try {
@@ -1714,6 +1727,7 @@
                 if (data.status === 'success') {
                     qrisImage.src = data.link_qris;
                     qrisImage.style.display = 'block';
+                    saveQRISBtn.disabled = false;
                     
                     // Simpan data QRIS untuk progress
                     currentQRISData = {
@@ -1726,9 +1740,11 @@
                     showPage('qris-page');
                 } else {
                     alert('Gagal generate QRIS: ' + (data.message || 'Unknown error'));
+                    saveQRISBtn.disabled = false;
                 }
             } catch (error) {
                 alert('Terjadi kesalahan: ' + error.message);
+                saveQRISBtn.disabled = false;
             } finally {
                 qrisLoading.style.display = 'none';
             }
